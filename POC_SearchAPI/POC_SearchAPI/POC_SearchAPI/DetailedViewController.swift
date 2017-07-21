@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import CoreSpotlight
+import MobileCoreServices
 
 class DetailedViewController: UIViewController, NSUserActivityDelegate {
     
@@ -23,6 +25,7 @@ class DetailedViewController: UIViewController, NSUserActivityDelegate {
         self.navigationController?.navigationBar.topItem?.title = ""
         self.setUpDataOnView()
         self.initUserActivity()
+//        self.setUpSpotLightSearch() /* Search API using CoreSpotlight Framework */
     }
     // MARK: Method for setting up data on the view
     func setUpDataOnView() {
@@ -51,6 +54,27 @@ class DetailedViewController: UIViewController, NSUserActivityDelegate {
         userActivity!.becomeCurrent()
     }
     
+    // MARK: Search API using CoreSpotlight Framework
+    func setUpSpotLightSearch(){
+        let attributeSet = CSSearchableItemAttributeSet.init(itemContentType: kUTTypeImage as String)
+        attributeSet.title = bookInfo.bookName
+        attributeSet.contentDescription = ""
+        var keywords:[String] = []
+        if let bookName = bookInfo.bookName as? NSString{
+            keywords = bookName.components(separatedBy: " ")
+        }
+        keywords.append(bookInfo.author)
+        keywords.append(bookInfo.price)
+        attributeSet.keywords = keywords
+        let item = CSSearchableItem.init(uniqueIdentifier: "com.infobeans.selfie.book", domainIdentifier: "spotlight.infobeans", attributeSet: attributeSet)
+        CSSearchableIndex.default().indexSearchableItems([item]) { (error) in
+            if let err = error{
+                print(err)
+            }
+            
+        }
+    }
+
     
     // MARK: NSUserActivity Delegate Methods
      func userActivityWillSave(_ userActivity: NSUserActivity) {
